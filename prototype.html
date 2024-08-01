@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protein Sequence Analyzer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+        input, button, select, textarea {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Protein Sequence Analyzer</h1>
+    <form id="proteinForm">
+        <label for="presetSequence">Choose a Preset Sequence:</label><br>
+        <select id="presetSequence">
+            <option value="">--Select a sequence--</option>
+            <option value="MGWSCIILFLVATATGVHS">Example 1: Default Signal Peptide</option>
+            <option value="DKTHTCPPCPAPELLGGPSVFLFPPKPKDTLMISRTPEVTCVVVDVSHEDPEVKFNWYVDGVEVHNAKTKPREEQYNSTYRVVSVLTVLHQDWLNGKEYKCKVSNKALPAPIEKTISKAKGQPREPQVYTLPPSRDELTKNQVSLTCLVKGFYPSDIAVEWESNGQPENNYKTTPPVLDSDGSFFLYSKLTVDKSRWQQGNVFSCSVMHEALHNHYTQKSLSLSPGK">Example 2: Human IgG1-Fc</option>
+        </select><br>
+
+        <label for="sequence">Enter Custom Protein Sequence:</label><br>
+        <textarea id="sequence" rows="6" placeholder="Enter amino acid sequence here..."></textarea><br>
+        <button type="button" onclick="analyzeSequence()">Analyze Sequence</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        function analyzeSequence() {
+            const sequence = document.getElementById('sequence').value.trim();
+            const presetSequence = document.getElementById('presetSequence').value;
+            const resultDiv = document.getElementById('result');
+
+            // Use preset sequence if available
+            const finalSequence = sequence || presetSequence;
+
+            if (!finalSequence) {
+                resultDiv.innerHTML = "<p style='color: red;'>Please enter a protein sequence or select a preset sequence.</p>";
+                return;
+            }
+
+            // Simple example of analyzing the sequence
+            const length = finalSequence.length;
+            const aminoAcids = new Set(finalSequence.match(/[A-Z]/g) || []);
+            const numUniqueAminoAcids = aminoAcids.size;
+            
+            // Calculate frequency of amino acids
+            const aminoAcidCounts = {};
+            finalSequence.match(/[A-Z]/g).forEach(aa => {
+                aminoAcidCounts[aa] = (aminoAcidCounts[aa] || 0) + 1;
+            });
+
+            // Analyze hydrophobicity (simplified example)
+            const hydrophobicAminoAcids = new Set('AILMFWV'); // Hydrophobic amino acids
+            let hydrophobicCount = 0;
+            finalSequence.split('').forEach(aa => {
+                if (hydrophobicAminoAcids.has(aa)) hydrophobicCount++;
+            });
+
+            resultDiv.innerHTML = `
+                <h2>Analysis Results</h2>
+                <p><strong>Sequence Length:</strong> ${length}</p>
+                <p><strong>Number of Unique Amino Acids:</strong> ${numUniqueAminoAcids}</p>
+                <p><strong>Unique Amino Acids:</strong> ${Array.from(aminoAcids).join(', ')}</p>
+                <p><strong>Hydrophobic Amino Acids Count:</strong> ${hydrophobicCount}</p>
+                <h3>Amino Acid Frequencies:</h3>
+                <ul>
+                    ${Object.entries(aminoAcidCounts).map(([aa, count]) => `<li>${aa}: ${count}</li>`).join('')}
+                </ul>
+            `;
+        }
+
+        // Load preset sequence into textarea when selected
+        document.getElementById('presetSequence').addEventListener('change', function() {
+            const presetValue = this.value;
+            if (presetValue) {
+                document.getElementById('sequence').value = presetValue;
+                analyzeSequence();
+            }
+        });
+    </script>
+</body>
+</html>
